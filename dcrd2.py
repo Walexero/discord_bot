@@ -29,9 +29,8 @@ def _get_sub_info():
 
     wcapi = API(
         url="https://learn-league.com/",
-        consumer_key= "ck_a482ff0296b8b4a56b74ac4dc0cffbcd9a3d7ed7",
-        consumer_secret= "cs_f2e6b2f73ce68d50dd36bcd10b64d0eea2aa1c3f",
-        wp_api=True,
+        consumer_key= os.getenv("PUB_KEY"),
+        consumer_secret= os.getenv("PRIV_KEY"),
         verify_ssl = True,
         version="wc/v3",
         query_string_auth = True,
@@ -52,8 +51,8 @@ def _get_subscription_info():
     def _query_api(input_query):
         wcapi = API(
             url="https://learn-league.com/",
-            consumer_key= "ck_a482ff0296b8b4a56b74ac4dc0cffbcd9a3d7ed7",
-            consumer_secret= "cs_f2e6b2f73ce68d50dd36bcd10b64d0eea2aa1c3f",
+            consumer_key= os.getenv("PUB_KEY"),
+            consumer_secret= os.getenv("PRIV_KEY"),
             wp_api=True,
             verify_ssl = True,
             version="wc/v3",
