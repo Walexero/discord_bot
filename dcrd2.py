@@ -20,6 +20,12 @@ import os
 # intents.message_content = True
 # client.run(TOKEN)
 # 
+STANDARD_PACKAGE_MONTHLY = None
+STANDARD_PACKAGE_YEARLY = None
+PRO_PACKAGE_MONTHLY = None
+PRO_PACKAGE_YEARLY = None
+
+
 normal_subscriber_min = 15
 normal_subscriber_max = 20
 pro_subscriber_min = 45
@@ -44,6 +50,7 @@ def _get_sub_info():
 
 # _get_sub_info()
 
+
 def _get_subscription_info():
     print("Starting to query API")
     email = input("Enter your email: ")
@@ -51,8 +58,8 @@ def _get_subscription_info():
     def _query_api(input_query):
         wcapi = API(
             url="https://learn-league.com/",
-            consumer_key= os.getenv("PUB_KEY"),
-            consumer_secret= os.getenv("PRIV_KEY"),
+            consumer_key= "ck_a482ff0296b8b4a56b74ac4dc0cffbcd9a3d7ed7",
+            consumer_secret= "cs_f2e6b2f73ce68d50dd36bcd10b64d0eea2aa1c3f",
             wp_api=True,
             verify_ssl = True,
             version="wc/v3",
@@ -67,7 +74,6 @@ def _get_subscription_info():
     def _subscription_verifier(subscribers: Str,customer_email):
         print("Finding Specific subscriber")
         for verify_subscriber_email in subscribers:
-            print(verify_subscriber_email["email"])
             #TODO: enable nice error in case the user isn't a user or subscriber at all
             if verify_subscriber_email["email"] == customer_email:
                 if verify_subscriber_email["is_paying_customer"]:
@@ -75,21 +81,46 @@ def _get_subscription_info():
                     return verify_subscriber_email["id"]
                 else:
                     print("Please Subscribe and try again")
-                    return False
+                    return 
+
+    def _get_product():
+        products = _query_api("products")
+        for product in products:
+            print(product["name"],product["id"])
+            #TODO: Write a function that is run if the checked order value falls with a section of the product id
+            if product["id"] == 3714:
+                STANDARD_PACKAGE_MONTHLY = product["price"]
+            if product["id"] == 3715:
+                STANDARD_PACKAGE_YEARLY = product["price"]
+            if product["id"] == 1481:
+                PRO_PACKAGE_MONTHLY = product["price"]
+            if product["id"] == 103:
+                PRO_PACKAGE_YEARLY = product["price"]
 
     def _payment_order(subscriber):
         print("Getting your payment")
+        def get_order(order_details):
+            get_subscriber_order_details = order_details["line_items"]
+            for subscriber_order in get_subscriber_order_details:
+                print(subscriber_order["product_id"])
+
+        def get_order_payment(order):
+            
+
         if subscriber:
             order_lookup = _query_api("orders")
             for subscriber_order in order_lookup:
                 if subscriber == subscriber_order["customer_id"]:
                     print("Yes,found you")
-                    get_subscriber_order = subscriber_order["total"]
-                    print(get_subscriber_order)
-                    if get_subscriber_order.find('.'):
-                        return float(get_subscriber_order)
-                    else:
-                        return int(get_subscriber_order)
+                    get_subscriber_order = get_order(subscriber_order)
+
+                    # print(get_subscriber_order)
+                    # get_subscriber_order = subscriber_order["total"]
+                    # print(get_subscriber_order)
+                    # if get_subscriber_order.find('.'):
+                    #     return float(get_subscriber_order)
+                    # else:
+                    #     return int(get_subscriber_order)
         else:
             pass    
 
@@ -103,8 +134,9 @@ def _get_subscription_info():
     
     subscriber_lookup = _subscription_verifier(_query_api("customers"), email)
     payment = _payment_order(subscriber_lookup)
+    # prod = _get_product()
 
-    if payment:
-        get_role(payment)
-        print("Finished querying API")
+    # if payment:
+    #     get_role(payment)
+    print("Finished querying API")
 _get_subscription_info()
