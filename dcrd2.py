@@ -1,35 +1,11 @@
 from ast import Str
 from woocommerce import API
 import os
-
-# client = discord.Client()
-
-# @client.event
-# async def on_ready():
-    # print(f'Bot is live as {client.user}')
-# 
-# @client.event
-# async def on_message(message):
-    # if message.author == client.user:
-        # return
-    # 
-    # # if message.channel.name == "bot_test" and message.content.startswith('hello'):
-        # await message.channel.send('Hi')
-# 
-# intents = discord.Intents.default()
-# intents.message_content = True
-# client.run(TOKEN)
-# 
+ 
 STANDARD_PACKAGE_MONTHLY = None
 STANDARD_PACKAGE_YEARLY = None
 PRO_PACKAGE_MONTHLY = None
 PRO_PACKAGE_YEARLY = None
-
-
-normal_subscriber_min = 15
-normal_subscriber_max = 20
-pro_subscriber_min = 45
-pro_subscriber_max = 50
 
 def _get_sub_info():
 
@@ -43,10 +19,6 @@ def _get_sub_info():
     )
     l_s = wcapi.get("customers").json()
     print(l_s)
-    # for items in l_s:
-    #     if items["email"] == "tester@web.net":
-    #         print(items)
-
 
 # _get_sub_info()
 
@@ -68,75 +40,82 @@ def _get_subscription_info():
     
         lookup = wcapi.get(input_query).json()
         return lookup
+            
+    #TODO: Create a nice fail or timeout for exceptions where the lookup fails:not necessary
     
-    #TODO: Create a nice fail or timeout for exceptions where the lookup fails
 
-    def _subscription_verifier(subscribers: Str,customer_email):
+    def subscription_verifier(subscribers:str,customer_email:str):
         print("Finding Specific subscriber")
         for verify_subscriber_email in subscribers:
-            #TODO: enable nice error in case the user isn't a user or subscriber at all
+            print(verify_subscriber_email["email"])
             if verify_subscriber_email["email"] == customer_email:
                 if verify_subscriber_email["is_paying_customer"]:
                     print("You are a subscriber")
+                    print(verify_subscriber_email["id"])
                     return verify_subscriber_email["id"]
                 else:
-                    print("Please Subscribe and try again")
-                    return 
+                    return "Please Subscribe and try again"
+            else:
+                pass
+            
 
-    def _get_product():
+    def _get_product(product_id):
+        # def assign_role_normal_user_monthly():
+        #     if 
+
         products = _query_api("products")
         for product in products:
-            print(product["name"],product["id"])
-            #TODO: Write a function that is run if the checked order value falls with a section of the product id
-            if product["id"] == 3714:
-                STANDARD_PACKAGE_MONTHLY = product["price"]
-            if product["id"] == 3715:
-                STANDARD_PACKAGE_YEARLY = product["price"]
-            if product["id"] == 1481:
-                PRO_PACKAGE_MONTHLY = product["price"]
-            if product["id"] == 103:
-                PRO_PACKAGE_YEARLY = product["price"]
-
-    def _payment_order(subscriber):
+            try:
+                #TODO: Write a function that is run if the checked order value falls with a section of the product id
+                while product["id"] == product_id and product["id"] == 3714:
+                    return "assign normal account"
+                while product["id"] == product_id and product["id"] == 3715:
+                    return "assign normal yearly account"
+                while product["id"] == product_id and product["id"] == 1481:
+                    return "assign pro account"
+                while product["id"] == product_id and product["id"] == 103:
+                    return "assign pro yearly account"
+            except:
+                return "You should subscribe to a qualifying plan to get a role"
+            
+    def _payment_order(subscriber,email):
         print("Getting your payment")
-        def get_order(order_details):
+
+        def _get_order(order_details):
             get_subscriber_order_details = order_details["line_items"]
             for subscriber_order in get_subscriber_order_details:
                 print(subscriber_order["product_id"])
+                return subscriber_order["product_id"]
 
-        def get_order_payment(order):
 
+        def get_product_id(subscriber):
+            if subscriber:
+                order_lookup = _query_api("orders")
+                for subscriber_order in order_lookup:
+                    if subscriber == subscriber_order["customer_id"]:
+                        print("Yes,found you")
+                        get_subscriber_order = _get_order(subscriber_order)
+                        print("Got your order")
+                        return get_subscriber_order
+            else:
+                return "Please Subscribe"
 
-        if subscriber:
-            order_lookup = _query_api("orders")
-            for subscriber_order in order_lookup:
-                if subscriber == subscriber_order["customer_id"]:
-                    print("Yes,found you")
-                    get_subscriber_order = get_order(subscriber_order)
-
-                    # print(get_subscriber_order)
-                    # get_subscriber_order = subscriber_order["total"]
-                    # print(get_subscriber_order)
-                    # if get_subscriber_order.find('.'):
-                    #     return float(get_subscriber_order)
-                    # else:
-                    #     return int(get_subscriber_order)
-        else:
-            pass    
-
-    def get_role(payment_amount):
-        print("Getting your role")
-        if payment_amount >= normal_subscriber_min and payment_amount <= normal_subscriber_max:
-            print("You're a normal Subscriber")
-        if payment_amount >= pro_subscriber_min and payment_amount <= pro_subscriber_max:
-            print("You're are a pro subscribe! Sensei")
+        return get_product_id(subscriber)
 
     
-    subscriber_lookup = _subscription_verifier(_query_api("customers"), email)
-    payment = _payment_order(subscriber_lookup)
-    # prod = _get_product()
+    subscriber_lookup = subscription_verifier(_query_api("customers"), email)
+    if type(subscriber_lookup) is int:
+        order = _payment_order(subscriber_lookup,email)
+        if type(order) is int:
+            payment_plan = _get_product(order)
+            print("The payment plan", payment_plan)
+        else:
+            print(order)
 
-    # if payment:
-    #     get_role(payment)
+    else:
+        print(subscriber_lookup)
+
+    # print(lookup_user)
+
     print("Finished querying API")
 _get_subscription_info()
