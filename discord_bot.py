@@ -9,7 +9,10 @@ load_dotenv(find_dotenv())
 server_name = os.getenv("SERVER_NAME")
 
 TOKEN = os.getenv("BOT_TOKEN")
-email_checker = ['.com', '.net', '.ru', '.co']
+
+email_checker = [
+  '.com', '.net', '.ru', '.co', '.bru', '.dme', '.me', '.nik', '.email'
+]
 
 class MyClient(discord.Client):
 
